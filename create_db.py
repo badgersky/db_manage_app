@@ -10,6 +10,8 @@ DB = 'users'
 def check_err(error):
     if 'already exists' in str(error):
         print('table/database already exists')
+    else:
+        print('unable to connect')
 
 
 # database creation

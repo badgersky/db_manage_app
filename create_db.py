@@ -4,7 +4,7 @@ from psycopg2 import connect, OperationalError, DatabaseError
 HOST = 'localhost'
 USER = 'postgres'
 PASSWORD = 'coderslab'
-DB = 'users'
+DB = 'users_db'
 
 
 def check_err(error):
@@ -19,7 +19,7 @@ def check_err(error):
 # database creation
 cnx = connect(host=HOST, user=USER, password=PASSWORD)
 cnx.autocommit = True
-sql = """CREATE DATABASE users;"""
+sql = """CREATE DATABASE users_db;"""
 try:
     with cnx.cursor() as cursor:
         cursor.execute(sql)
@@ -31,7 +31,7 @@ cnx.close()
 cnx = connect(host=HOST, user=USER, password=PASSWORD, database=DB)
 cnx.autocommit = True
 users_sql = """CREATE TABLE users (id serial, username varchar(255) UNIQUE,
-hashed_passw varchar(80), PRIMARY KEY (id));"""
+hashed_passw varchar(255), PRIMARY KEY (id));"""
 try:
     with cnx.cursor() as cursor:
         cursor.execute(users_sql)

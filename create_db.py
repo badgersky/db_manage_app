@@ -39,7 +39,7 @@ except (OperationalError, DatabaseError) as err:
     check_err(err)
 
 # table messages creation
-messages_sql = """CREATE TABLE messages (id serial, from_id int NOT NULL UNIQUE , to_id int NOT NULL UNIQUE,
+messages_sql = """CREATE TABLE messages (id serial, from_id int NOT NULL, to_id int NOT NULL,
 message_date TIMESTAMP NOT NULL DEFAULT CURRENT_DATE, text varchar(255), PRIMARY KEY (id),
 FOREIGN KEY (from_id) REFERENCES users(id) ON DELETE CASCADE,
 FOREIGN KEY (TO_ID) REFERENCES users(id) ON DELETE CASCADE);"""

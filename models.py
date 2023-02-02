@@ -1,5 +1,5 @@
 import bcrypt
-from psycopg2 import connect
+from psycopg2 import connect, OperationalError
 
 
 class User:
@@ -33,7 +33,7 @@ class User:
 
     @staticmethod
     def load_by_username(cursor, username):
-        sql_task = """SELECT * FROM users WHERE username=%s"""
+        sql_task = """SELECT * FROM users WHERE username=%s;"""
         cursor.execute(sql_task, (username,))
         data = cursor.fetchone()
         if not data:
@@ -44,6 +44,47 @@ class User:
             loaded_user._id = user_id
             loaded_user._hashed_password = hashed_password
             return loaded_user
+
+    @staticmethod
+    def load_by_id(cursor, user_id):
+        sql_task = """SELECT * FROM users WHERE id=%s;"""
+        cursor.execute(sql_task, (user_id,))
+        data = cursor.fetchone()
+        if not data:
+            return None
+        else:
+            user_id, username, hashed_password = data
+            loaded_user = User(username)
+            loaded_user._id = user_id
+            loaded_user._hashed_password = hashed_password
+            return loaded_user
+
+    @staticmethod
+    def load_all_users(cursor):
+        sql_task = """SELECT * FROM users;"""
+        cursor.execute(sql_task)
+        data = cursor.fetchall()
+        if not data:
+            return None
+        else:
+            users = []
+            for user in data:
+                user_id, username, hashes_password = user
+                loaded_user = User(username)
+                loaded_user._id = user_id
+                loaded_user._hashed_password = hashes_password
+                users.append(loaded_user)
+            return users
+
+    @staticmethod
+    def delete_user(cursor, username):
+        sql_task = """DELETE FROM users WHERE username=%s;"""
+        try:
+            cursor.execute(sql_task, (username,))
+        except OperationalError:
+            print('error in delete_user')
+        print('user deleted')
+        return None
 
 
 if __name__ == '__main__':
@@ -56,10 +97,7 @@ if __name__ == '__main__':
     cnx.autocommit = True
     c = cnx.cursor()
 
-    user2 = User('ottego', 'siemasie')
-    user2.save_to_db(c)
-    print(user2.id)
-    print(User.load_by_username(c, 'amid4maru'))
+    User.delete_user(c, 'ottego')
 
     c.close()
     cnx.close()

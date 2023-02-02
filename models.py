@@ -96,7 +96,7 @@ class Message:
 
     def __init__(self, from_id, to_id, mess):
         self._id = -1
-        self.date = None
+        self._date = None
         self.from_id = from_id
         self.to_id = to_id
         self.mess = mess
@@ -104,6 +104,10 @@ class Message:
     @property
     def id(self):
         return self._id
+
+    @property
+    def date(self):
+        return self._date
 
     def save_to_db(self, cursor):
         if self._id == -1:

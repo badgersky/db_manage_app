@@ -8,6 +8,8 @@ DB = 'users'
 
 
 def check_err(error):
+    """checks what type of error occurs"""
+
     if 'already exists' in str(error):
         print('table/database already exists')
     else:
@@ -47,5 +49,3 @@ try:
 except (OperationalError, DatabaseError) as err:
     check_err(err)
 cnx.close()
-
-

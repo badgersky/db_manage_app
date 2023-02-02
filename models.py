@@ -1,5 +1,6 @@
 import bcrypt
 from psycopg2 import connect, OperationalError
+from datetime import datetime
 
 
 class User:
@@ -29,7 +30,10 @@ class User:
             cursor.execute(sql_task, values)
             self._id = cursor.fetchone()[0]
             return True
-        return False
+        else:
+            sql_task = """UPDATE users SET username=%s, hashed_passw=%s WHERE id=%s;"""
+            values = (self.username, self._hashed_password, self._id)
+            cursor.execute(sql_task, values)
 
     @staticmethod
     def load_by_username(cursor, username):
@@ -87,6 +91,52 @@ class User:
         return None
 
 
+class Message:
+    """class for managing messages in database"""
+
+    def __init__(self, from_id, to_id, mess):
+        self._id = -1
+        self.date = None
+        self.from_id = from_id
+        self.to_id = to_id
+        self.mess = mess
+
+    @property
+    def id(self):
+        return self._id
+
+    def save_to_db(self, cursor):
+        if self._id == -1:
+            sql_task = """INSERT INTO messages(from_id, to_id, message_date, text)VALUES(%s, %s, %s, %s) RETURNING id;"""
+            self.date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            values = (self.from_id, self.to_id, self.date, self.mess)
+            cursor.execute(sql_task, values)
+            self._id = cursor.fetchone()[0]
+            return True
+        else:
+            sql_task = """UPDATE messages SET from_id=%s, to_id=%s, message_date=$s, text=%s WHERE id=$s;"""
+            values = (self.from_id, self.to_id, self.date, self.mess, self._id)
+            cursor.execute(sql_task, values)
+            return True
+
+    @staticmethod
+    def load_all_messages(cursor):
+        sql_task = """SELECT * FROM messages;"""
+        cursor.execute(sql_task)
+        data = cursor.fetchall()
+        if not data:
+            return False
+        else:
+            messages = []
+            for message in data:
+                mess_id, from_id, to_id, date, text = message
+                loaded_message = Message(from_id, to_id, text)
+                loaded_message._id = mess_id
+                loaded_message.date = date
+                messages.append(loaded_message)
+            return messages
+
+
 if __name__ == '__main__':
     HOST = 'localhost'
     USER = 'postgres'
@@ -97,7 +147,10 @@ if __name__ == '__main__':
     cnx.autocommit = True
     c = cnx.cursor()
 
-    User.delete_user(c, 'ottego')
+    user4 = User('pancake', 'love_pancakes')
+    user4.save_to_db(c)
+
+    print(Message.load_all_messages(c))
 
     c.close()
     cnx.close()

@@ -1,4 +1,9 @@
-from psycopg2 import connect, OperationalError, DatabaseError
+from psycopg2 import connect
+from psycopg2 import errors
+
+
+DuplicateDatabase = errors.lookup('42P04')
+DuplicateTable = errors.lookup('42P07')
 
 
 HOST = 'localhost'
@@ -23,8 +28,8 @@ sql = """CREATE DATABASE users_db;"""
 try:
     with cnx.cursor() as cursor:
         cursor.execute(sql)
-except (OperationalError, DatabaseError) as err:
-    check_err(err)
+except DuplicateDatabase as err:
+    print('Database already exists')
 cnx.close()
 
 # table users creation
@@ -35,8 +40,8 @@ hashed_passw varchar(255), PRIMARY KEY (id));"""
 try:
     with cnx.cursor() as cursor:
         cursor.execute(users_sql)
-except (OperationalError, DatabaseError) as err:
-    check_err(err)
+except DuplicateTable as err:
+    print('Table already exists')
 
 # table messages creation
 messages_sql = """CREATE TABLE messages (id serial, from_id int NOT NULL, to_id int NOT NULL,
@@ -46,6 +51,6 @@ FOREIGN KEY (TO_ID) REFERENCES users(id) ON DELETE CASCADE);"""
 try:
     with cnx.cursor() as cursor:
         cursor.execute(messages_sql)
-except (OperationalError, DatabaseError) as err:
-    check_err(err)
+except DuplicateTable as err:
+    print('Table already exists')
 cnx.close()

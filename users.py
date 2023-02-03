@@ -1,6 +1,6 @@
 from models import User
 import argparse
-from psycopg2 import errors
+from psycopg2 import errors, connect, OperationalError
 import bcrypt
 
 
@@ -59,12 +59,27 @@ def edit_user(username, password, new_password, cur):
         print('Incorrect password')
 
 
+if __name__ == '__main__':
+    HOST = 'localhost'
+    USER = 'postgres'
+    PASSWORD = 'coderslab'
+    DB = 'users_db'
 
+    try:
+        cnx = connect(host=HOST, user=USER, password=PASSWORD, database=DB)
+        cnx.autocommit = True
+        c = cnx.cursor()
+    
+        if args.username and args.password and args.delete:
+            delete_user(args.username, args.password, c)
+        elif args.list:
+            list_users(c)
+        elif args.username and args.password and args.new_pass and args.edit:
+            edit_user(args.username, args.password, args.new_pass, c)
+        elif args.username and args.password:
+            create_user(args.username, args.password, c)
 
-
-
-
-
-
-
-
+        c.close()
+        cnx.close()
+    except OperationalError as e:
+        print('error: ', e)

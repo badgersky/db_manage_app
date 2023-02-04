@@ -136,7 +136,7 @@ class Message:
                 mess_id, from_id, to_id, date, text = message
                 loaded_message = Message(from_id, to_id, text)
                 loaded_message._id = mess_id
-                loaded_message.date = date
+                loaded_message._date = date
                 messages.append(loaded_message)
             return messages
 
@@ -151,10 +151,7 @@ if __name__ == '__main__':
     cnx.autocommit = True
     c = cnx.cursor()
 
-    user4 = User('pancake', 'love_pancakes')
-    user4.save_to_db(c)
-
-    print(Message.load_all_messages(c))
+    messages = Message.load_all_messages(c)
 
     c.close()
     cnx.close()

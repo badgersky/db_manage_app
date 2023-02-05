@@ -1,7 +1,7 @@
 from models import Message, User
 from psycopg2 import connect, OperationalError
 import argparse
-import bcrypt
+from passw_hash import check_password
 
 
 parser = argparse.ArgumentParser()
@@ -19,7 +19,7 @@ def list_messages(cursor, username, password):
     user = User.load_by_username(cursor, username)
     if not user:
         print('User does not exist')
-    elif bcrypt.checkpw(bytes(password, encoding='utf-8'), user.hashed_password):
+    elif check_password(password, user.password):
         messages = Message.load_all_messages(cursor)
         for message in messages:
             if message.to_id == user.id:
@@ -34,7 +34,7 @@ def send_message(cursor, username, password, addressee, message):
     user = User.load_by_username(cursor, username)
     if not user:
         print('User does not exist')
-    elif bcrypt.checkpw(bytes(password, encoding='utf-8'), user.hashed_password):
+    elif check_password(password, user.password):
         user_to = User.load_by_username(cursor, addressee)
         if not user_to:
             print('Pointed addressee does not exist')

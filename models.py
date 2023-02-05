@@ -112,7 +112,7 @@ class Message:
     def save_to_db(self, cursor):
         if self._id == -1:
             sql_task = """INSERT INTO messages(from_id, to_id, message_date, text)VALUES(%s, %s, %s, %s) RETURNING id;"""
-            self.date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self._date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             values = (self.from_id, self.to_id, self.date, self.mess)
             cursor.execute(sql_task, values)
             self._id = cursor.fetchone()[0]

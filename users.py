@@ -1,7 +1,7 @@
 from models import User
 import argparse
 from psycopg2 import errors, connect, OperationalError
-import bcrypt
+from passw_hash import check_password
 
 
 UniqueViolation = errors.lookup('23505')
@@ -12,8 +12,8 @@ parser.add_argument('-u', '--username', help='username')
 parser.add_argument('-p', '--password', help='min 8 characters')
 parser.add_argument('-n', '--new_pass', help='new password')
 parser.add_argument('-l', '--list', help='list users', action='store_true')
-parser.add_argument('-d', '--delete', help='delete user')
-parser.add_argument('-e', '--edit', help='edit user')
+parser.add_argument('-d', '--delete', help='delete user', action='store_true')
+parser.add_argument('-e', '--edit', help='edit user', action='store_true')
 
 args = parser.parse_args()
 
@@ -39,7 +39,7 @@ def delete_user(username, password, cur):
     user = User.load_by_username(cur, username)
     if not user:
         print('User does not exist')
-    elif bcrypt.checkpw(bytes(password, encoding='utf-8'), user.hashed_password):
+    elif check_password(password, user.password):
         User.delete_user(cur, username)
     else:
         print('Incorrect password')
@@ -49,7 +49,7 @@ def edit_user(username, password, new_password, cur):
     user = User.load_by_username(cur, username)
     if not user:
         print('User does not exist')
-    elif bcrypt.checkpw(bytes(password, encoding='utf-8'), user.hashed_password):
+    elif check_password(password, user.password):
         if len(new_password) < 8:
             print('New password is too short')
         else:

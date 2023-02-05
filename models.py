@@ -1,6 +1,6 @@
-import bcrypt
 from psycopg2 import connect, OperationalError
 from datetime import datetime
+from passw_hash import hash_password
 
 
 class User:
@@ -9,7 +9,7 @@ class User:
     def __init__(self, username, password=''):
         self._id = -1
         self.username = username
-        self._hashed_password = bcrypt.hashpw(bytes(password, encoding='utf-8'), bcrypt.gensalt())
+        self._hashed_password = hash_password(password)
 
     @property
     def password(self):
@@ -21,7 +21,7 @@ class User:
 
     @password.setter
     def password(self, new_password):
-        self._hashed_password = bcrypt.hashpw(bytes(new_password, encoding='utf-8'), bcrypt.gensalt())
+        self._hashed_password = hash_password(new_password)
 
     def save_to_db(self, cursor):
         if self._id == -1:
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     cnx.autocommit = True
     c = cnx.cursor()
 
-    messages = Message.load_all_messages(c)
+    m = Message.load_all_messages(c)
 
     c.close()
     cnx.close()
